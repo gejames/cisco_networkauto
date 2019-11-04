@@ -1,0 +1,20 @@
+---
+
+
+- name: UPDATE VTY-ACL ACCESS LIST
+  ios_config:
+    parents: ip access-list extended VTY-ACL
+    lines:
+      - permit tcp 192.168.0.0 0.0.255.255 any eq 22
+      - permit tcp 10.0.0.0 0.255.255.255 any eq 22 log-input
+      - deny   ip any any log-input
+    match: exact
+    replace: block
+    before:
+      - line vty 0 15
+      - NO access-class VTY-ACL in
+      - NO ip access-list extended VTY-ACL
+    after:
+      - line vty 0 15
+      - access-class VTY-ACL in
+

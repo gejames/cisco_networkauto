@@ -1,0 +1,43 @@
+---
+- name: COPY IOS TO ROUTER
+  hosts: routers
+  connection: network_cli
+  gather_facts: no
+
+  tasks:
+
+      - name: GATHER_ROUTER_FACTS
+        ios_facts:
+   
+
+      - name: OUTPUT JSON
+        debug:
+          msg: "{{ ios_facts.stdout_lines }}"
+
+
+      - name: ASSIGN VARS FOR C2900
+        set_fact:
+            compliant_ios_version: "{{ c2900_compliant_ios_version }}"
+            ios_file: "{{ c2900_ios_file }}"
+            required_free_space: "{{ c2900_required_free_space }}"
+        when: ansible_net_model | regex_search("^CISCO29.*")
+
+      - name: ASSIGN VARS FOR C3900
+        set_fact:
+          compliant_ios_version: "{{ c3900_compliant_ios_version }}"
+          ios_file: "{{ c3900_ios_file }}"
+          required_free_space: "{{ c3900_required_free_space }}"
+        when: ansible_net_model | regex_search("^CISCO39.*")
+
+      - name: ASSIGN VARS FOR C4300
+        set_fact:
+          compliant_ios_version: "{{ c4300_compliant_ios_version }}"
+          ios_file: "{{ c4300_ios_file }}"
+          required_free_space: "{{ c4300_required_free_space }}"
+        when: ansible_net_model | regex_search("^CISCO43.*")
+
+      - name: COPY IOS IF NOT COMPLIANT
+        command: "scp /mnt/ftp/{{ ios_file }} {{ inventory_hostname }}:/{{ ios_file }}"
+        when:
+          - ansible_net_version != compliant_ios_version
+          # - ansible_net_filesystems_info["flash0:"].spacefree_kb  > required_free_space

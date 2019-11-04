@@ -1,0 +1,64 @@
+---
+- name: COPY IOS TO ROUTER
+  hosts: routers
+  connection: network_cli
+  gather_facts: no
+  
+  vars:
+    2900_compliant_ios_version: 15.6(3)M6
+    c2900_ios_file: c2900-unciversalk9-mz.SPA.155-3.M6.bin
+    c2900_required_free_space: 140000
+    c2900_md5sum: bfc2a2747f8274e76340176d50027e9207065123
+
+    c3900_complaint_ios_version: 15.6(3)M6
+    c3900_ios_file: c3900-universalk9-mz.SPA.156-3.M6.bin
+    c3900_required_free_space: 140000
+    c3900_md5sum: 914a53d7006332d828cb797db11e432a5feea58b
+
+  tasks:
+
+    - name: ENABLE SCP
+      ios_config:
+        lines:
+          - ip scp server enable
+
+    - name: GATHER_ROUTER_FACTS
+      ios_facts:
+      tags: facts
+
+    - name: ASSIGN VARS FOR C2900
+      set_fact: 
+          compliant_ios_version: "{{ c2900_compliant_ios_version }}"
+          ios_file: "{{ c2900_ios_file }}"
+          required_free_space: "{{ c2900_required_free_space }}"
+          compliant_md5: "{{ c2900_md5sum }} "
+      when: ansible_net_model | regex_search("^CISCO29.*") 
+
+    - name: ASSIGN VARS FOR C3900
+      set_fact: 
+         compliant_ios_version: "{{ c3900_compliant_ios_version }}"
+         ios_file: "{{ c3900_ios_file }}"
+         required_free_space: "{{ c3900_required_free_space }}"
+         compliant_md5: "{{ c3900_md5sum }} "
+      when: ansible_net_model | regex_search("^CISCO39.*")
+    
+  
+    - name: COPY IOS IF NOT COMPLIANT
+      command: "scp /mnt/ftp/{{ ios_file }} fisadmin@{{ inventory_hostname }}:/{{ ios_file }}"
+      when:
+        - ansible_net_version != compliant_ios_version
+        - ansible_net_filesystems_info["flash0:"].spacefree_kb  > required_free_space 
+    
+    
+    - name: CHECK MD5 HASH
+      ios_command:
+          commands:
+            - command: "verify /md5 bootflash:{{ ios_file }}"
+      register: md5_result
+      vars:
+        ansible_command_timeout: 300
+
+    - debug: msg='MD5 CHECKSUM FAILED'
+      when: 'compliant_ios_md5_value not in md5_response.stdout[0]'
+
+

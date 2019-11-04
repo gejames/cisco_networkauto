@@ -1,0 +1,23 @@
+---
+- name: GENERATE HSRP REPORT  
+  hosts: routers
+  connection: network_cli
+  gather_facts: no
+
+  roles:
+    - ansible-network.network-engine
+
+  tasks:
+
+  - name: SHOW INTERFACE
+    ios_command:
+      commands: show interface
+    register: interface_output
+  
+  - name: PARSE HSRP OUTPUT
+    command_parser:
+      file: "parsers/show_interfaces.yml"
+      content: "{{ interface_output.stdout[0] }}"
+
+  - debug:
+      msg: "{{ interface_facts }}"

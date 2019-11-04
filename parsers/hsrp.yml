@@ -1,0 +1,134 @@
+---
+- name: parser meta data
+  parser_metadata:
+    version: 1.0
+    command: show standby
+    network_os: ios
+
+- name: match sections
+  pattern_match:
+    regex: "^(\\S+\\s+\\-\\sGroup\\s\\d+)"
+    match_all: yes
+    match_greedy: yes
+  register: section     
+
+- name: match hsrp interfaces
+  pattern_group:
+    - name: match interface name
+      pattern_match:
+        regex: "^(\\S+)"
+        content: "{{ item }}"
+      register: hsrp_interface
+
+    - name: match hsrp groups
+      pattern_match: 
+        regex: "^\\S+.*Group\\s(\\d+)"
+        content: "{{ item }}"
+      register: hsrp_group
+
+    - name: match hsrp state
+      pattern_match:
+        regex: "^\\s+.*State is (.*)"
+        content: "{{ item }}"
+      register: hsrp_state
+
+    - name: match virtual IP
+      pattern_match:
+        regex: "^\\s+Virtual IP address is (.*)"
+        content: "{{ item }}"
+      register: hsrp_vip
+            
+    - name: match hello time
+      pattern_match: 
+        regex: "^\\s+Hello time (.*),"
+        content: "{{ item }}"
+      register: hsrp_hello
+
+    - name: match hold time
+      pattern_match:
+        regex: "^\\s+Hello time .*, hold time (.*)"
+        content: "{{ item }}"
+      register: hsrp_hold
+
+    - name: match preemption
+      pattern_match:
+        regex: "^\\s+Preemption\\s+(.*)"
+        content: "{{ item }}"
+      register: hsrp_preemption
+
+    - name: match active router
+      pattern_match:
+        regex: "^\\s+Active router is (.*)"
+        content: "{{ item }}"
+      register: hsrp_active_router
+      
+    - name: match standby router
+      pattern_match:
+        regex: "^\\s+Standby router is (\\d+\\.\\d+\\.\\d+\\.\\d+)"
+        content: "{{ item }}"
+      register: hsrp_standby_router
+
+    - name: match standby priority
+      pattern_match: 
+        regex: "^\\s+Standby.*, priority\\s(\\d+)"
+        content: "{{ item }}"
+      register: hsrp_standby_priority
+
+    - name: match current priority
+      pattern_match:
+        regex: "^\\s+Priority\\s(\\d+)"
+        content: "{{ item }}"
+      register: hsrp_current_priority
+
+    - name: match configured priority
+      pattern_match: 
+        regex:  "^\\s+Priority.*configured (\\d+)"
+        content: "{{ item }}"
+      register: hsrp_configured_priority
+
+    - name: match group name
+      pattern_match:
+        regex: "^\\s+Group name is \"(.*)\""
+        content: "{{ item }}"
+      register: hsrp_group_name
+      
+  loop: "{{ section }}"
+  register: hsrp
+
+- name: generate json data structure
+  json_template:
+    template:
+      - key: "{{ item.hsrp_interface.matches.0 }}"
+        object:
+          - key: config
+            object:
+              - key: hsrp_interface
+                value: "{{ item.hsrp_inerface.matches.0 }}"
+              - key: hsrp_group
+                value: "{{ item.hsrp_group.matches.0 }}"
+              - key: hsrp_state
+                value: "{{ item.hsrp_state.matches.0 }}"
+              - key: hsrp_vip
+                value: "{{ item.hsrp_vip.matches.0 }}"
+              - key: hsrp_hello
+                value: "{{ item.hsrp_hello.matches.0 }}"
+              - key: hsrp_hold
+                value: "{{ item.hsrp_hold.matches.0 }}"
+              - key: hsrp_preemption
+                value: "{{ item.hsrp_preemption.matches.0 }}"
+              - key: hsrp_active_router
+                value: "{{ item.hsrp_acive_router.matches.0 }}"
+              - key: hsrp_standby_router
+                value: "{{ item.hsrp_standby_router.matches.0 }}"
+              - key: hsrp_current_priorty
+                value: "{{ item.hsrp_current_priority.matches.0 }}"
+              - key: hsrp_configured_priority
+                value: "{{ item.hsrp_configured_priority.matches.0 }}"
+              - key: hsrp_group_name
+                value: "{{ item.hsrp_group_name.matches.0 }}"
+             
+  loop: "{{ hsrp }}"
+  export: yes
+  register: hsrp_facts
+
+

@@ -1,0 +1,65 @@
+---
+- name: UPDATE QOS
+  hosts: switches
+  connection: network_cli
+  gather_facts: no
+
+  tasks:
+
+    - name: BACKING UP CURRENT RUNNING CONFIG TO LOCAL SERVER BEFORE MAKING CHANGES
+      ios_config:
+        backup: true
+
+    - name: GET LIST OF ACCESS PORTS WITH Phone IN DESCRIPTION
+      ios_command:
+        commands:
+          - show interface description | include [Pp]hone
+      register: access_ports
+
+    - name:  GET LIST OF TRUNK PORTS.  DONT MATCH Port-Channel PORTS
+      ios_command:
+          commands:
+            - show interface status | include ^[Fa|Gi|Te|Fo|Eth].*trunk   # Excludes Port-channel interfaces
+      register: trunk_ports
+
+    - name: GET LIST OF PORTS BELONGING TO A PORT CHANNEL
+      ios_command:
+        commands:
+          - show etherchannel port | include ^Port._   # Matches Port:
+      register: etherchannel_ports
+
+    - debug:
+       msg:  '{{ item.split()[0] }}'
+      with_items: "{{ access_ports.stdout_lines[0] }}"
+      verbosity: 2
+    
+  
+    - name: ADD AUTO QOS TO ACCESS PORTS
+      ios_config:
+        lines:
+          -  auto qos trust dscp
+        parents: interface {{ item.split()[0] | 
+                regex_replace('^Gi','GigabitEthernet') | 
+                regex_replace('^Fa','FastEthernet') |
+                regex_replace('^Te','TenGigabitEthernet') |
+                regex_replace('^Fo','FortyGigabitEthernet') |
+                regex_replace('^Eth','Ethernet') }}
+      with_items: "{{ access_ports.stdout_lines[0] }}"
+
+    - name: ADD AUTO QOS TO TRUNK PORTS. FILTER OUT PORTS BELONGING TO A PORT CHANNEL
+      ios_config:
+        lines:
+          - auto qos trust dscp
+        parents: interface {{ item.split()[0] | 
+                regex_replace('^Gi','GigabitEthernet') |
+                regex_replace('^Fa','FastEthernet') |
+                regex_replace('^Te','TenGigabitEthernet') |
+                regex_replace('^Fo','FortyGigabitEthernet') |
+                regex_replace('^Eth','Ethernet') }}
+      when: 'item.split()[0] not in etherchannel_ports.stdout[0]'
+      with_items: "{{ trunk_ports.stdout_lines[0] }}"
+
+    - name: SAVE CONFIG IF CHANGES WERE MADE
+      ios_config:
+        save_when: changed
+...

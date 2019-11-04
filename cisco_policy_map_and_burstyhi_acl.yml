@@ -1,0 +1,166 @@
+---
+- name: POLICY MAP UPDATE
+  hosts: routers
+  connection: network_cli
+  gather_facts: no
+
+  tasks:
+
+       
+    - name: DISCOVER SHAPE AVERAGE
+      ios_command:
+        - show running | include shape average
+      register: shape_average_output
+    
+    - set_fact:
+        shape_average: "{{ item.split()[2] }}"
+      with_items: "{{ shape_average_output.stdout_lines[0] }}"
+
+    - name: DISCOVER WAN INTERFACE
+      ios_command:
+        - show ip cef | in 0.0.0.0/0 
+      register: wan_int_output
+    
+    - set_fact:
+        wan_int: "{{ item.split()[2] }}"
+      with_items: "{{ wan_int_output.stdout_lines[0] }}"
+
+    - name: MAKE SURE OLD POLICY MAP IS REMOVED
+      ios_config:
+        lines: 
+          - no class-map match-any old-BL
+          - no class-map match-any old-BH
+          - no class-map match-any old-BE
+          - no class-map match-any old-RT
+          - no policy-map old-input-mark
+          - no policy-map old-COS
+
+    - name: ADD class-map match-any VOICE
+      ios_config:
+        parents: class-map match-any VOICE
+        lines: 
+          - match ip dscp ef 
+          - match ip dscp cs5
+    
+    - name:  ADD class-map match-any INTERACTIVE-VIDEO
+      ios_config:
+         parents: class-map match-any INTERACTIVE-VIDEO
+         lines:
+           - match ip dscp af41 
+           - match ip dscp af42 
+           - match ip dscp af43
+    
+    - name: ADD class-map match-any MISSION-CRITICAL-DATA
+      ios_config:
+        parents: class-map match-any MISSION-CRITICAL-DATA
+        lines:
+          - match ip dscp af31 
+          - match ip dscp af32
+          - match ip dscp af33
+          - match protocol dns
+          - match protocol ldap
+          - match protocol secure-ldap
+          - match protocol sqlserver
+          - match protocol citrix
+          - match access-group name BURSTY-HI 
+   
+    - name: ADD class-map match-any MISSION-CRITICAL-DATA ms-wbt for 43xx
+      ios_config:
+        parents: class-map match-any MISSION-CRITICAL-DATA
+        lines:
+          - match protocol ms-wbt
+      when: ansible_net_model | regex_search("^CISCO43.*")
+
+    - name: ADD class-map match-any TRANSACTIONAL-DATA
+      ios_config:
+        parents: class-map match-any TRANSACTIONAL-DATA
+        lines:
+          - match ip dscp af21
+          - match ip dscp af22
+          - match protocol ftp
+          - match protocol exchange
+          - match access-group name BURSTY-LO
+
+    - name: ADD class-map match-any TRANSACTIONAL-DATA ftp-data for 43xx
+      ios_config:
+        parents: class-map match-any TRANSACTIONAL-DATA
+        lines:
+          - match protocol ftp-data
+      when: ansible_net_model | regex_search("^CISCO43.*")
+    
+    - name: APPLY policy-map QOS-POLICY class VOICE
+      ios_config:
+        lines:
+          - priority percent 30 
+        parents: 
+           - policy-map QOS-POLICY
+           - class VOICE
+
+    - name: APPLY policy-map QOS-POLICY class INTERACTIVE-VIDEO
+      ios_config:
+        lines:
+          - priority percent 20 
+        parents: 
+           - policy-map QOS-POLICY
+           - class INTERACTIVE-VIDEO     
+
+    - name: APPLY policy-map QOS-POLICY class MISSION-CRITICAL-DATA
+      ios_config:
+        lines:
+          - bandwidth percent 15 
+          - random-detect 
+          - set dscp af31         
+        parents: 
+           - policy-map QOS-POLICY
+           - class MISSION-CRITICAL-DATA  
+
+    - name: APPLY policy-map QOS-POLICY class TRANSACTIONAL-DATA
+      ios_config:
+        lines:
+          - bandwidth percent 15 
+          - random-detect 
+          - set dscp af21      
+        parents:
+          - policy-map QOS-POLICY
+          - class TRANSACTIONAL-DATA
+
+    - name: APPLY policy-map QOS-POLICY class class-default 
+      ios_config:
+        lines:
+          - bandwidth percent  20
+          - random-detect
+        parents: 
+          - policy-map QOS-POLICY
+          - class class-default  
+
+   
+      
+    - name: APPLY policy-map CENTURYLINK-PARENT
+      ios_config:
+        lines:
+            - shape average {{ shape_average }}
+            - service-policy QOS-POLICY
+        parents: 
+          - policy-map CENTURYLINK-PARENT
+          - class class-default  
+        before: NO policy-map OLD-PARENT
+    
+ 
+    
+    - name: APPLY CENTURYLINK-PARENT TO WAN INTERFACE
+      ios_config:
+        lines:
+          - no service-policy output OLD-PARENT
+          - service-policy output CENTURYLINK-PARENT
+        parents: interface {{ wan_int }}
+    
+    - name: save running to startup when modified
+      ios_config:
+        save_when: modified
+
+    
+
+
+
+
+

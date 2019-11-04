@@ -1,0 +1,26 @@
+---
+- name: GENERATE HSRP REPORT  
+  hosts: routers
+  connection: network_cli
+  gather_facts: no
+
+  roles:
+    - ansible-network.network-engine
+
+
+
+  tasks:
+
+
+  - name: GATHERING HSRP INFO
+    ios_command:
+      commands: show standby
+    register: hsrp_output
+  
+  - name: PARSE HSRP OUTPUT
+    command_parser:
+      file: "parsers/hsrp.yml"
+      content: "{{ hsrp_output.stdout[0] }}"
+
+  - debug:
+      msg: "{{ hsrp_facts }}"

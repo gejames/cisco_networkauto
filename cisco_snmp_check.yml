@@ -1,0 +1,50 @@
+---
+- name: CISCO SNMP CHECK
+  hosts: all
+  connection: network_cli
+  gather_facts: no
+
+  vars:
+    snmp_host: NOT_FOUND
+    snmp_version: NOT_FOUND
+    snmp_community: NOT_FOUND
+
+  tasks:
+
+    - name: GET HOSTNAME
+      ios_command:
+        commands:
+          - show version | include uptime
+      register: hostname_output
+
+    - name: FINDING SNMP-SERVER HOSTS
+      ios_command:
+      commands:
+        - show running-config | include snmp-server host 204.16.31.52
+      register: snmp_hosts_output
+     
+    - set_fact:
+      hostname: "{{ item.split()[0] }} "
+      with_items: "{{ hostname_output.stdout_lines[0] }}"
+
+    - name:  CREATE REPORT
+      vars:
+        snmp_host: "{{ item.split()[2] }}"
+        snmp_version: "{{ item.split()[4] }}"
+        snmp_community: "{{ item.split()[5] }}"
+      lineinfile:
+        path: ~/networkauto2/plays/sed/sed_snmp_check/ansible_snmp_report.csv
+        insertafter: 'EOF'
+        line: "{{ hostname }},{{ inventory_hostname }},{{ snmp_host }},{{ snmp_community }}"
+      with_items: "{{ snmp_hosts_output.stdout_lines[0] }}"
+      when: "'204.16.31.52' in snmp_hosts_output.stdout[0]"
+      
+  
+        
+
+  
+...
+
+
+       
+     
