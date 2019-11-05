@@ -37,7 +37,7 @@
         insertafter: 'EOF'
         line: "{{ hostname }},{{ inventory_hostname }},{{ snmp_host }},{{ snmp_community }}"
       with_items: "{{ snmp_hosts_output.stdout_lines[0] }}"
-      when: "'204.16.31.52' in snmp_hosts_output.stdout[0]"
+      when: "'1.2.3.4' in snmp_hosts_output.stdout[0]"
       
   
         

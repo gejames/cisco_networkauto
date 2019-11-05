@@ -1,21 +1,15 @@
 ---
 
-     
-  - name: FINDING EXSTING USERS 
-    ios_command:
-      commands:
-          - show run | i username
-    register: existing_usernames
+- name: REMOVE EXISTING USERS
+  ios_user:
+    purge: yes
+  when: cisco_purge_users is True
 
-                  
-  - name: REMOVE EXISTING USERNAMES 
-    ios_config:
-        lines:
-          - NO {{ itmems }}
-    with_items: "{{ existing_usernames.stdout_lines }}"
-  
-  - name: ADD NEW USERNAME
-    ios_config:
-        lines:
-          - username {{ new_cisco_username }} privilege 15 secret 0 {{ new_cisco_password }}
-            
+- name: ADD NEW USERNAME
+  ios_user: 
+     name: {{ cisco_new_user }}          
+     configured_password: {{ cisco_user_password }}
+     password_type: password
+     privilege: {{ cisco_user_priv }}
+
+     
