@@ -1,5 +1,5 @@
 ---
-- name: GENERATE HSRP REPORT  
+- name: PARSE SHOW INTERFACE
   hosts: all
   connection: network_cli
   gather_facts: no
