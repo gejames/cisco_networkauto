@@ -6,6 +6,8 @@
 
   roles:
     - gather_facts
+
+
   vars:
     snmp_host: NOT_FOUND
     snmp_version: NOT_FOUND
@@ -21,8 +23,8 @@
 
     - name: FINDING SNMP-SERVER HOSTS
       cli_command:
-      commands:
-        - show running-config | include snmp-server host 1.2.3.4
+        commands:
+          - show running-config | include snmp-server host 1.2.3.4
       register: snmp_hosts_output
      
     - set_fact:
