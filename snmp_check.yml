@@ -26,10 +26,6 @@
         commands:
           - show running-config | include snmp-server host 1.2.3.4
       register: snmp_hosts_output
-     
-    - set_fact:
-      hostname: "{{ item.split()[1] }} "
-      with_items: "{{ hostname_output.stdout_lines[0] }}"
 
     - name:  CREATE REPORT
       vars:
