@@ -4,6 +4,8 @@
   connection: network_cli
   gather_facts: no
 
+  roles:
+    - gather_facts
   vars:
     snmp_host: NOT_FOUND
     snmp_version: NOT_FOUND
@@ -33,7 +35,7 @@
         snmp_version: "{{ item.split()[4] }}"
         snmp_community: "{{ item.split()[5] }}"
       lineinfile:
-        path: ~/networkauto2/plays/sed/sed_snmp_check/ansible_snmp_report.csv
+        path: ./snmp_check/ansible_snmp_report.csv
         insertafter: 'EOF'
         line: "{{ hostname }},{{ inventory_hostname }},{{ snmp_host }},{{ snmp_community }}"
       with_items: "{{ snmp_hosts_output.stdout_lines[0] }}"
