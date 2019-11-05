@@ -1,0 +1,3 @@
+---
+- name: GATHER IOS FACTS
+  ios_facts:

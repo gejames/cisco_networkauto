@@ -12,19 +12,19 @@
   tasks:
 
     - name: GET HOSTNAME
-      ios_command:
+      cli_command:
         commands:
-          - show version | include uptime
+          - show run | in hostname
       register: hostname_output
 
     - name: FINDING SNMP-SERVER HOSTS
-      ios_command:
+      cli_command:
       commands:
-        - show running-config | include snmp-server host 204.16.31.52
+        - show running-config | include snmp-server host 1.2.3.4
       register: snmp_hosts_output
      
     - set_fact:
-      hostname: "{{ item.split()[0] }} "
+      hostname: "{{ item.split()[1] }} "
       with_items: "{{ hostname_output.stdout_lines[0] }}"
 
     - name:  CREATE REPORT
