@@ -1,5 +1,5 @@
 ---
-- name: CORRECT VTY-ACL ON FNF CISCO DEVICES
+- name: CORRECT VTY-ACL ON CISCO DEVICES
   hosts: all
   connection: network_cli
   gather_facts: no
@@ -9,13 +9,10 @@
     - name: SAVE RUNNING-CONFIG TO NVRAM FOR RECOVERY IF NEEDED
       ios_config:
         save_when: always
+
     - name: Set the task_status var
       set_fact:
         task_status: "OK"
-
-    - name: BACKING UP CURRENT RUNNING CONFIG TO LOCAL SERVER BEFORE MAKING CHANGES
-      ios_config:
-        backup: true
 
     - block:
       - name: UPDATE VTY-ACL ACCESS LIST
