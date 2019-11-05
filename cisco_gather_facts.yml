@@ -4,4 +4,6 @@
   connection: network_cli
   gather_facts: no
 
-  roles: gather_facts
+  roles: 
+    - gather_facts
+    
