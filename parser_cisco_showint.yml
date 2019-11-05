@@ -1,6 +1,6 @@
 ---
 - name: GENERATE HSRP REPORT  
-  hosts: routers
+  hosts: all
   connection: network_cli
   gather_facts: no
 
@@ -14,7 +14,7 @@
       commands: show interface
     register: interface_output
   
-  - name: PARSE HSRP OUTPUT
+  - name: PARSE SHOW INTERFACES
     command_parser:
       file: "parsers/show_interfaces.yml"
       content: "{{ interface_output.stdout[0] }}"

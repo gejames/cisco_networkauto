@@ -1,6 +1,6 @@
 ---
 - name: POLICY MAP UPDATE
-  hosts: routers
+  hosts: cisco_routers
   connection: network_cli
   gather_facts: no
 
