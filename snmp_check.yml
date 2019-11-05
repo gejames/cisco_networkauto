@@ -17,13 +17,13 @@
 
     - name: GET HOSTNAME
       cli_command:
-        commands:
+        command:
           - show run | in hostname
       register: hostname_output
 
     - name: FINDING SNMP-SERVER HOSTS
       cli_command:
-        commands:
+        command:
           - show running-config | include snmp-server host 1.2.3.4
       register: snmp_hosts_output
 
@@ -40,10 +40,7 @@
       when: "'1.2.3.4' in snmp_hosts_output.stdout[0]"
       tags: 
         - snmp_report
-  
-        
-
-  
+   
 ...
 
 
