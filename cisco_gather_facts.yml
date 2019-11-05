@@ -1,6 +1,5 @@
 ---
-
-- name: UPDATE QOS
+- name: GATHER FACTS
   hosts: all
   connection: network_cli
   gather_facts: no
