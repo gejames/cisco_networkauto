@@ -1,3 +1,0 @@
----
-- name: GATHER_ROUTER_FACTS
-  eos_facts:

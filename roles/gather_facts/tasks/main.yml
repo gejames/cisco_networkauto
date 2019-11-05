@@ -1,0 +1,10 @@
+---
+- name: GATHER IOS FACTS
+  ios_facts:
+  when: ansible_network_os == 'ios'
+
+- name: GATHER IOS FACTS
+  eos_facts: 
+  when: ansible_network_os == 'eos'
+
+  
