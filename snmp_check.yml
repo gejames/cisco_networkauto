@@ -17,14 +17,12 @@
 
     - name: GET HOSTNAME
       cli_command:
-        command:
-          - show run | in hostname
+        command: show running-config | include hostname
       register: hostname_output
 
     - name: FINDING SNMP-SERVER HOSTS
       cli_command:
-        command:
-          - show running-config | include snmp-server host 1.2.3.4
+        command: show running-config | include snmp-server host 1.2.3.4
       register: snmp_hosts_output
 
     - name:  CREATE REPORT
