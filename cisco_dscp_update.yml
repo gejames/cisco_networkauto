@@ -1,6 +1,6 @@
 ---
 - name: UPDATE QOS
-  hosts: {{ tower_inventory}}
+  hosts: "{{ tower_inventory }}"
   connection: network_cli
   gather_facts: no
 

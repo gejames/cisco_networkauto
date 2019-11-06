@@ -1,6 +1,6 @@
 ---
 - name: POLICY MAP UPDATE
-  hosts: cisco_routers
+  hosts: "{{ tower_inventory }}"
   connection: network_cli
   gather_facts: no
 
