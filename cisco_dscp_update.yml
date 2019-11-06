@@ -1,6 +1,6 @@
 ---
 - name: UPDATE QOS
-  hosts: switches
+  hosts: {{ tower_inventory}}
   connection: network_cli
   gather_facts: no
 
@@ -25,7 +25,7 @@
     - name: GET LIST OF PORTS BELONGING TO A PORT CHANNEL
       ios_command:
         commands:
-          - show etherchannel port | include ^Port._   # Matches Port:
+          - show etherchannel port | include ^Port._  
       register: etherchannel_ports
 
     - debug:
