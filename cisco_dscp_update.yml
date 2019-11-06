@@ -6,10 +6,6 @@
 
   tasks:
 
-    - name: BACKING UP CURRENT RUNNING CONFIG TO LOCAL SERVER BEFORE MAKING CHANGES
-      ios_config:
-        backup: true
-
     - name: GET LIST OF ACCESS PORTS WITH Phone IN DESCRIPTION
       ios_command:
         commands:
