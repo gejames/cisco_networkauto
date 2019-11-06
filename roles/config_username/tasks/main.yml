@@ -3,8 +3,8 @@
 - name: REMOVE EXISTING USERS
   ios_user:
     purge: yes
-  when: cisco_purge_users is True
-
+  when: cisco_purge_users == "Yes"
+    
 - name: ADD NEW USERNAME
   ios_user: 
      name: "{{ cisco_new_user }}"
