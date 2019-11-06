@@ -1,0 +1,8 @@
+---
+- name: ADD NEW USER
+  hosts: "{{ tower_inventory }}"
+  connection: network_cli
+  gather_facts: no
+
+  roles:
+    - config_username
