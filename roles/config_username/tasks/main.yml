@@ -7,9 +7,9 @@
 
 - name: ADD NEW USERNAME
   ios_user: 
-     name: {{ cisco_new_user }}          
-     configured_password: {{ cisco_user_password }}
+     name: "{{ cisco_new_user }}"
+     configured_password: "{{ cisco_user_password }}"
      password_type: password
-     privilege: {{ cisco_user_priv }}
+     privilege: "{{ cisco_user_priv }}"
+     state: present
 
-     
