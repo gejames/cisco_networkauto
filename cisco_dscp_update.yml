@@ -28,12 +28,7 @@
           - show etherchannel port | include ^Port._  
       register: etherchannel_ports
 
-    - debug:
-       msg:  '{{ item.split()[0] }}'
-      with_items: "{{ access_ports.stdout_lines[0] }}"
-      verbosity: 2
-    
-  
+     
     - name: ADD AUTO QOS TO ACCESS PORTS
       ios_config:
         lines:
