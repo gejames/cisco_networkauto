@@ -1,6 +1,6 @@
 ---
 - name: STANDARDIZING QOS ACL TO CLASSIFY BURSTY-HI TRAFFIC ON CISCO ROUTERS
-  hosts: routers
+  hosts: {{ tower_inventory }}
   connection: network_cli
   gather_facts: no
 
@@ -12,12 +12,12 @@
     - name: VERIFY IF THE ACL EXISTS ON THE ROUTER
       ios_command:
         commands:
-          - show ip access-lists | include sed-BURSTY-HI
+          - show ip access-lists | include BURSTY-HI
       register: check_acl
     
     - name: ENSURE THAT THE ACL IS CONFIGURED CORRECTLY AS PER STANDARD ONLY ON ROUTERS WHICH HAVE THIS ACL
       ios_config:
-        parents: ip access-list extended sed-BURSTY-HI
+        parents: ip access-list extended BURSTY-HI
         lines:
           - remark maintenance protocols
           - permit tcp any any eq bgp
@@ -31,8 +31,8 @@
           
         match: exact
         replace: block
-        before: no ip access-list extended sed-BURSTY-HI
-      when: "'sed-BURSTY-HI' in check_acl.stdout[0]"
+        before: no ip access-list extended BURSTY-HI
+      when: "'BURSTY-HI' in check_acl.stdout[0]"
 
     - name: MAKE CERTAIN THAT THE RUNNING-CONFIG IS SAVED WHEN IT IS MODIFIED
       ios_config:
