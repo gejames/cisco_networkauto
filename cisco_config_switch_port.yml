@@ -28,6 +28,7 @@
               - name: "{{ interface_name }}"
                 desription:  'Configured by Ansible'
                 enabled: true
+            state: merged
        when: port_enabled
 
 
@@ -37,5 +38,6 @@
             - name: "{{ interface_name }}"
               description: 'Admin down by Ansible'
               enabled: false
+          state: merged
        when: not port_enabled
 
