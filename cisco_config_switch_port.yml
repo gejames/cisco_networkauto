@@ -6,24 +6,34 @@
 
   vars:
     interface_name: GigabitEthernet1/0
-    access_vlan: 1
+    access_vlan: 20
     port_enabled: false
 
 
   tasks:
     
-      - name: CONFIGURE L2 PORT
-        ios_l2_interfaces:
-          config:
-            - name: "{{ interface_name }}"
-              access:
-                vlan: "{{ access_vlan | int }}"
-          state: overridden
-        when:  port_enabled 
+     - name: CONFIGURE AND ENABLE L2 PORT
+       block: 
+        - name: CONFIGURE L2 PORT
+          ios_l2_interfaces:
+            config:
+              - name: "{{ interface_name }}"
+                access:
+                  vlan: "{{ access_vlan | int }}"
+            state: overridden
 
-      - name: DISABLE L2 PORT
-        ios_config:
-          lines:
-            - SHUTDOWN
-          parents: interface "{{ interface_name }}
-        when:  not port_enabled 
+        - name: ENABLE L2 PORT
+          ios_interfaces:
+            config: 
+              - name: "{{ interface_name }}"
+                enabled: true
+       when: port_enabled
+
+
+     - name: DISABLE L2 PORT
+       ios_interfaces:
+          config: 
+            - name: "{{ interface_name }}"
+              enabled: false
+       when: not port_enabled
+
