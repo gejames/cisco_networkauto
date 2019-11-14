@@ -20,12 +20,13 @@
               - name: "{{ interface_name }}"
                 access:
                   vlan: "{{ access_vlan | int }}"
-            state: overridden
+            state: replace
 
         - name: ENABLE L2 PORT
           ios_interfaces:
             config: 
               - name: "{{ interface_name }}"
+                desription:  'Configured by Ansible'
                 enabled: true
        when: port_enabled
 
@@ -34,6 +35,7 @@
        ios_interfaces:
           config: 
             - name: "{{ interface_name }}"
+              description: 'Admin down by Ansible'
               enabled: false
        when: not port_enabled
 
