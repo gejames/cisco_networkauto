@@ -1,0 +1,30 @@
+[cisco:vars]
+ansible_network_os=ios
+
+[cisco:children]
+cisco_switches
+cisco_routers
+
+[cisco_switches]
+swtich1  ansible_host=192.168.60.16
+switch2  ansible_host=192.168.60.15
+
+[cisco_routers]
+rtr1   ansible_host=192.168.60.61
+rtr2   ansible_host=192.168.60.62
+rtr3   ansible_host=192.168.60.63
+rtr4   ansible_host=192.168.60.64
+
+[eos:vars]
+ansible_network_os=eos
+
+[eos]
+switch3  ansible_host=192.168.60.17
+
+
+[switches]
+cisco_switches
+eos_swtiches
+
+[routers]
+cisco_routers

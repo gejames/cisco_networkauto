@@ -1,0 +1,11 @@
+---
+nodes:
+   rtr1:
+     Loopback0:"192.168.61.31"
+   rtr2:
+    Loopback0::"192.168.61.32"
+   rtr3:
+    Loopbac0:"192.168.61.33"
+   rtr4:
+    Loopback0:"192.168,61.34"
+     
