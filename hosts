@@ -1,0 +1,2 @@
+[switches]
+192.168.60.63 ansible_network_os=ios

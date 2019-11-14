@@ -5,16 +5,25 @@
   gather_facts: no
 
   vars:
-    interface_name: GigabitEthernet0/8
+    interface_name: GigabitEthernet1/0
     access_vlan: 1
-
+    port_enabled: true
 
 
   tasks:
     
-    ios_l2_interfaces:
-    config:
-      - name: "{{ interface_name }}"
-        access:
-          vlan: "{{ access_vlan }"
-    state: overridden
+      - name: CONFIGURE L2 PORT
+        ios_l2_interfaces:
+          config:
+            - name: "{{ interface_name }}"
+              access:
+                vlan: "{{ access_vlan | int }}"
+          state: overridden
+        when:  port_enabled 
+
+      - name: DISABLE L2 PORT
+        ios_config:
+          commands:
+            - SHUTDOWN
+          parents: interface "{{ interface_name }}
+        when:  not port_enabled 
