@@ -7,7 +7,7 @@
   vars:
     interface_name: GigabitEthernet1/0
     access_vlan: 1
-    port_enabled: true
+    port_enabled: false
 
 
   tasks:
@@ -23,7 +23,7 @@
 
       - name: DISABLE L2 PORT
         ios_config:
-          commands:
+          lines:
             - SHUTDOWN
           parents: interface "{{ interface_name }}
         when:  not port_enabled 
